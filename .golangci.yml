@@ -86,7 +86,7 @@ linters-settings:
       - .WithStack(
       - .Err()
     ignorePackageGlobs:
-      - github.com/blizzy78/gorest*
+      - github.com/blizzy78/gotimeseries*
       - golang.org/x/sync/errgroup*
       - github.com/hashicorp/go-multierror*
       - github.com/magefile/mage*
