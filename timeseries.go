@@ -11,9 +11,12 @@ type TimeSeries struct {
 	// Specifically, the first bucket represents the time period firstBucketTime-granularity < x <= firstBucketTime.
 	firstBucketTime time.Time
 
-	// buckets store the number of events that occurred in a time period of granularity.
+	// buckets is a ring buffer that stores the number of events that occurred in a time period of granularity.
 	// The first bucket represents the latest of those periods, while the last bucket represents the oldest.
 	buckets []uint64
+
+	// firstBucketIndex is the index of the first bucket in buckets.
+	firstBucketIndex int
 }
 
 // New creates a new TimeSeries with the given granularity and number of buckets.
@@ -37,13 +40,19 @@ func (t *TimeSeries) Update(now time.Time) {
 	t.firstBucketTime = t.firstBucketTime.Add(time.Duration(numShifts) * t.granularity)
 
 	sliceShifts := min(numShifts, len(t.buckets))
-	copy(t.buckets[sliceShifts:], t.buckets[:len(t.buckets)-sliceShifts])
-	clear(t.buckets[:sliceShifts])
+	for i := 0; i < sliceShifts; i++ {
+		t.firstBucketIndex--
+		if t.firstBucketIndex < 0 {
+			t.firstBucketIndex = len(t.buckets) - 1
+		}
+
+		t.buckets[t.firstBucketIndex] = 0
+	}
 }
 
 // Increase increments the count of events in the current time period.
 func (t *TimeSeries) Increase() {
-	t.buckets[0]++
+	t.buckets[t.firstBucketIndex]++
 }
 
 // Total returns the total number of events that have occurred in the time series.
@@ -54,4 +63,8 @@ func (t *TimeSeries) Total() uint64 {
 	}
 
 	return total
+}
+
+func (t *TimeSeries) bucketsSlice() []uint64 {
+	return append(t.buckets[t.firstBucketIndex:], t.buckets[:t.firstBucketIndex]...)
 }

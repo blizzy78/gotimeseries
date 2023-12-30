@@ -42,7 +42,7 @@ func TestTimeSeries(t *testing.T) {
 			series.Increase()
 		}
 
-		is.Equal(series.buckets, event.wantBuckets)
+		is.Equal(series.bucketsSlice(), event.wantBuckets)
 
 		total := uint64(0)
 		for _, b := range event.wantBuckets {
