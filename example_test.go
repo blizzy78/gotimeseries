@@ -1,17 +1,18 @@
-package gotimeseries
+package gotimeseries_test
 
 import (
 	"fmt"
 	"time"
+
+	"github.com/blizzy78/gotimeseries"
 )
 
 func Example() {
-	const buckets = 10
-
 	now := time.Now()
 
 	// construct a new time series that tracks 10 minutes
-	series := New(time.Minute, buckets, now)
+	const buckets = 10
+	series := gotimeseries.New(time.Minute, buckets, now)
 
 	// ... time passes ...
 	now = now.Add(20 * time.Second)
